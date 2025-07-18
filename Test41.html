@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Form with Bootstrap 4, Dark Background, and Left Alignment</title>
+    <!-- Bootstrap 4 CSS CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts - Oswald -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to ensure font is appliead globally and body height */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font as per instructions */
+            min-height: 100vh; /* Full viewport height */
+            background-color: #121212; /* Dark background color changed to #121212 */
+            color: #FFFFFF; /* Default text color for body */
+            display: flex; /* Use flexbox for body to manage main content and top bar */
+            flex-direction: column;
+        }
+        /* Override browser autofill styles for input fields */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0px 1000px #FFFFFF inset !important; /* White background for autofill */
+            -webkit-text-fill-color: #212529 !important; /* Dark text color for autofill */
+            transition: background-color 5000s ease-in-out 0s; /* Prevent transition to blue */
+        }
+
+        /* Custom style for the select arrow to ensure consistency across browsers */
+        select.form-control {
+            -webkit-appearance: none; /* Hide default arrow for Webkit browsers */
+            -moz-appearance: none;
+            appearance: none; /* Hide default arrow for modern browsers */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            /* Position the arrow to appear on the white bar */
+            background-position: calc(100% + 70px) center; /* Adjust 70px based on white-extension-bar width minus arrow size */
+            background-size: 1.5em 1.5em; /* Adjust arrow size */
+            padding-right: 2.5rem; /* Make space for the custom arrow */
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            border-right: none !important; /* Remove right border to blend */
+        }
+
+        /* Custom radio button styling for the main shipping method */
+        input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            display: inline-block;
+            width: 1.25rem; /* size of the radio button */
+            height: 1.25rem; /* size of the radio button */
+            background-color: #FFFFFF; /* White background */
+            border: 2px solid #000000; /* Thicker black border */
+            border-radius: 50%; /* round shape */
+            vertical-align: middle;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input[type="radio"]:checked {
+            border-color: #712C81; /* STC purple border when checked */
+            background-color: #712C81; /* STC purple background when checked */
+        }
+
+        input[type="radio"]:checked::after {
+            content: '';
+            display: block;
+            width: 0.5rem; /* inner circle size */
+            height: 0.5rem; /* inner circle size */
+            background-color: #FFFFFF; /* white inner circle */
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        input[type="radio"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(113, 44, 129, 0.25); /* STC purple focus ring */
+        }
+
+        /* Class to make text 50% transparent */
+        .text-transparent-on-save {
+            opacity: 0.5 !important; /* 50% transparency */
+        }
+        .text-transparent-on-save::placeholder {
+            opacity: 0.5 !important; /* 50% transparency for placeholders */
+        }
+
+        /* Custom class for transparent background on save */
+        .bg-transparent-on-save {
+            /* Changed from transparent to 50% opaque white */
+            background-color: rgba(255, 255, 255, 0.5) !important;
+            box-shadow: none !important; /* Remove any shadow */
+            border-color: transparent !important; /* Make border transparent */
+        }
+
+        /* Style for error message */
+        .error-message {
+            color: #dc2626; /* Red color */
+            font-size: 0.875rem; /* text-sm */
+            margin-top: 0.5rem; /* mt-2 */
+            display: none; /* Hidden by default */
+        }
+        .error-message.show {
+            display: block; /* Show when 'show' class is present */
+        }
+
+        /* Custom style for the information icon and tooltip */
+        .info-icon-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+            border-radius: 50%;
+            border: 1px solid #6c757d; /* gray-600 equivalent */
+            color: #6c757d; /* gray-600 equivalent */
+            background-color: #FFFFFF;
+            font-size: 0.875rem;
+            font-weight: bold;
+            cursor: help;
+            margin-left: 0.5rem; /* ml-2 */
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .info-tooltip {
+            position: absolute;
+            left: 100%; /* left-full */
+            margin-left: 0.5rem; /* ml-2 */
+            top: 50%;
+            transform: translateY(-50%); /* -translate-y-1/2 */
+            width: 18rem; /* Increased width for more text */
+            background-color: #222222; /* Changed to #222222 */
+            color: #FFFFFF;
+            font-size: 0.875rem; /* text-sm */
+            padding: 0.5rem; /* p-2 */
+            border-radius: 0.25rem; /* rounded */
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15); /* shadow-lg */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            white-space: normal; /* Allow text to wrap */
+            z-index: 10;
+        }
+
+        .info-icon-container:hover .info-tooltip {
+            opacity: 1;
+        }
+
+        /* Custom font size for labels */
+        .text-lg {
+            font-size: 1.25rem; /* Approx. 20px, similar to Tailwind's text-lg */
+        }
+        .text-sm {
+            font-size: 0.875rem; /* Approx. 14px, similar to Tailwind's text-sm */
+        }
+
+        /* Oswald font for specific label */
+        .oswald-font {
+            font-family: 'Oswald', sans-serif;
+        }
+
+        /* Image styling for the logo at the top of the form */
+        .stc-bank-logo {
+            max-width: 70px; /* Made smaller */
+            height: auto;
+            display: block; /* Ensures it takes its own line */
+            margin-top: 0.5rem; /* Adjusted downwards */
+            margin-bottom: 0.5rem; /* Adds bottom margin */
+            margin-left: -0.2rem; /* Adjusted slightly right */
+        }
+
+        /* Image styling for the logo near payment section */
+        .stc-bank-logo-payment {
+            max-width: 70px; /* Smaller size, consistent with the top logo */
+            height: auto;
+            display: block; /* Ensures it takes its own line */
+            margin-top: 1rem; /* Spacing below the "Payment" text */
+            margin-left: 0; /* Align to the left */
+        }
+
+        /* White bar at the top */
+        .top-white-bar {
+            width: 100%; /* Will be 100% of its parent (form-container) */
+            min-height: 50px; /* Minimum height for the bar */
+            background-color: #FFFFFF; /* White background */
+            z-index: 1000; /* Ensure it's above other content */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Optional: add a subtle shadow */
+            display: flex;
+            align-items: center;
+            padding: 0 1rem; /* Add some padding */
+            transition: min-height 0.3s ease-in-out; /* Smooth transition for height */
+            /* Removed max-width to allow it to expand to 100% of form-container */
+            margin-left: 0; /* Align to the left */
+            margin-right: auto; /* Push to left */
+        }
+
+        .order-summary-toggle {
+            color: #0056b3; /* Darker shade of Bootstrap primary blue */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 1rem 0; /* Padding for click area */
+            margin-left: 0; /* Changed from 20% to 0 */
+        }
+
+        .order-summary-toggle .caret {
+            margin-left: 0.5rem;
+            display: inline-block;
+            width: 0;
+            height: 0;
+            vertical-align: middle;
+            border-top: 0.3em solid;
+            border-right: 0.3em solid transparent;
+            border-left: 0.3em solid transparent;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .order-summary-toggle.collapsed .caret {
+            transform: rotate(0deg);
+        }
+
+        .order-summary-toggle:not(.collapsed) .caret {
+            transform: rotate(180deg);
+        }
+
+        .order-summary-content {
+            background-color: #f8f9fa; /* Light gray background for dropdown content */
+            color: #212529; /* Dark text for content */
+            padding: 1rem;
+            border-top: 1px solid #dee2e6;
+            width: 100%;
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Vertically align items */
+            padding-top: 1.5rem; /* Increased padding for more space */
+            padding-bottom: 1.5rem; /* Increased padding for more space */
+            /* Removed max-width to allow it to expand to 100% of form-container */
+            margin-left: 0; /* Align to the left */
+            margin-right: auto; /* Push to left */
+        }
+
+        /* Custom style for the shipping price */
+        .shipping-price {
+            font-size: 1.25rem; /* Larger font size */
+            /* Removed margin-top: -0.5rem; as it's no longer needed with new flex layout */
+        }
+
+        /* Container for the image and badge */
+        .image-with-badge-container {
+            position: relative;
+            display: inline-block; /* To contain absolute positioned badge */
+            margin-left: 0; /* Changed from 2rem to 0 */
+            margin-right: 1rem; /* Space between image and text */
+        }
+
+        /* Style for the image inside the dropdown content */
+        .order-summary-content .product-image { /* Changed class name for clarity */
+            height: 80px; /* Enlarge the image */
+            width: 80px; /* Set width to match height for square aspect */
+            object-fit: cover; /* Ensures the image covers the area without distortion */
+            border-radius: 0.25rem; /* Optional: add rounded corners to the image */
+        }
+
+        /* Style for the badge circle */
+        .badge-circle {
+            position: absolute;
+            top: -5px; /* Adjust as needed for vertical position */
+            right: -5px; /* Adjust as needed for horizontal position */
+            background-color: #000000; /* Black background */
+            color: #FFFFFF; /* White text */
+            border-radius: 50%; /* Make it circular */
+            width: 20px; /* Small size for the circle */
+            height: 20px; /* Small size for the circle */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem; /* Small font size for the number */
+            font-weight: bold;
+            z-index: 1; /* Ensure it's above the image */
+        }
+
+        /* Style for the price text in the order summary */
+        .order-summary-prices { /* Changed class name to plural as it now contains multiple prices */
+            margin-left: auto; /* Pushes it to the right as much as possible */
+            margin-right: 0; /* Removed fixed margin-right */
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* Align prices to the right */
+        }
+
+        .order-summary-text-group span {
+            margin-top: 0.75rem; /* Consistent spacing */
+            font-weight: normal; /* Make text not bold */
+        }
+
+        .order-summary-text-group .product-name {
+            font-weight: bold; /* Keep product name bold */
+        }
+
+        /* Specific styling for the promo code input to adjust padding and icon position */
+        .input-group.promo-code-input-group .form-control {
+            padding-right: 0.75rem; /* Reduced padding as info icon is removed */
+        }
+        /* Removed .input-group.promo-code-input-group .info-icon-container rule */
+
+        /* Ensure promo code discount row is hidden by default using a class */
+        .promo-code-hidden {
+            display: none;
+        }
+
+        /* Styling for the main payment section container */
+        #paymentSection {
+            width: 100%;
+            max-width: 700px; /* Max width for the content */
+            margin: 0 auto; /* Center the content */
+            padding: 20px; /* Add padding inside the section */
+            box-sizing: border-box; /* Include padding in element's total width and height */
+            opacity: 0; /* Initially hidden */
+            transition: opacity 0.5s ease-in-out, margin-top 0.5s ease-in-out; /* Smooth transition for appearance and margin */
+            height: 0; /* Collapse height when hidden */
+            overflow: hidden; /* Hide content when collapsed */
+            margin-top: 0; /* Ensure no margin-top when hidden */
+        }
+
+        #paymentSection.show-payment-section {
+            opacity: 1; /* Fully visible */
+            height: auto; /* Allow content to dictate height */
+            margin-top: 3rem; /* Apply margin-top only when shown */
+        }
+
+        /* New styles for the white extension bars */
+        .input-with-bar-wrapper {
+            display: flex;
+            align-items: stretch; /* Ensure children stretch to fill height */
+            margin-bottom: 1rem; /* Match Bootstrap's mb-4 (16px) */
+            width: 100%; /* Ensure wrapper takes full width */
+        }
+
+        .input-with-bar-wrapper .form-control {
+            flex-grow: 1; /* Input takes all available space */
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            border-right: none !important; /* Remove right border to blend */
+        }
+
+        .white-extension-bar {
+            background-color: white;
+            width: 120px; /* Desired visual extension length - Increased from 100px */
+            height: calc(2.25rem + 2px); /* Match Bootstrap input height + border */
+            border: 1px solid #ced4da; /* Match Bootstrap input border color */
+            border-left: none; /* No left border to blend with input */
+            border-top-right-radius: 0.25rem; /* Match input rounded corners */
+            border-bottom-right-radius: 0.25rem; /* Match input rounded corners */
+            box-sizing: border-box; /* Include padding/border in width/height */
+            transition: opacity 0.5s ease-in-out; /* Add transition for opacity */
+        }
+        /* Add a class for the transparent white bar */
+        .white-extension-bar.text-transparent-on-save {
+            opacity: 0.5 !important;
+            background-color: transparent !important; /* Ensure it goes transparent */
+            border-color: transparent !important; /* Make border transparent */
+        }
+
+        /* Adjust for form-row columns */
+        .form-row .col .input-with-bar-wrapper {
+            margin-bottom: 0; /* Remove extra margin if inside a col */
+        }
+
+        /* New styles for the image button */
+        .proceed-to-payment-img {
+            width: 100%;
+            height: 60px; /* Approximate height of the original button */
+            object-fit: cover; /* Fill the area */
+            cursor: pointer;
+            border-radius: 0.25rem; /* Match other rounded elements */
+            margin-top: 1.5rem; /* Equivalent to Bootstrap mt-4 */
+            margin-bottom: 1rem; /* Equivalent to Bootstrap mb-3/4 */
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Bootstrap shadow */
+            transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+        }
+
+        .proceed-to-payment-img:hover {
+            transform: translateY(-2px); /* Lift slightly */
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25); /* More pronounced shadow */
+        }
+
+        .proceed-to-payment-img:active {
+            transform: translateY(2px); /* Push down */
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* Reduced shadow */
+        }
+
+        /* Styles for the dynamically appearing input fields */
+        .contact-input-group {
+            display: none; /* Hidden by default */
+            margin-top: 1rem;
+            align-items: center; /* Ensure vertical alignment */
+            width: 100%; /* Take full width */
+        }
+        .contact-input-group.show {
+            display: flex; /* Use flex for input and button alignment */
+        }
+        .contact-input-group .form-control {
+            flex-grow: 1;
+            margin-right: 0.5rem; /* Space between input and button */
+        }
+        .contact-input-group .btn {
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+        /* Styling for horizontal radio buttons */
+        .form-check-inline {
+            margin-right: 1.5rem; /* Space between horizontal options */
+        }
+        /* Ensure labels within form-check are not bold */
+        .form-check-label {
+            font-weight: normal !important;
+        }
+        /* Styling for the country code select and input group (removed flag specific styling) */
+        .whatsapp-input-container .input-group-prepend .form-control,
+        .whatsapp-input-container .input-group-prepend .input-group-text,
+        .whatsapp-input-container .input-group-prepend {
+            /* Removed specific styling related to flag/country code select */
+            display: none; /* Hide the prepend group entirely */
+        }
+        .whatsapp-input-container input[type="tel"].form-control {
+            border-top-left-radius: .25rem !important; /* Ensure rounded corners on left */
+            border-bottom-left-radius: .25rem !important; /* Ensure rounded corners on left */
+            border-left: 1px solid #ced4da !important; /* Restore left border */
+        }
+
+
+        /* Positioning for the info icon relative to the image */
+        .image-info-container {
+            position: relative;
+            display: inline-block; /* To contain the absolutely positioned icon */
+            max-width: 100%; /* Inherit from parent */
+            width: 100%; /* Inherit from parent */
+            /* margin-left: -5%; Removed as it was causing misalignment */
+        }
+        .image-info-container .info-icon-bottom-right {
+            position: absolute;
+            bottom: 0; /* Align to the bottom of the container */
+            right: 0; /* Align to the right of the container */
+            transform: translate(50%, 50%); /* Shift it out by half its size */
+            background-color: #FFFFFF; /* White background for visibility */
+            border: 1px solid #6c757d;
+            border-radius: 50%;
+            width: 1.25rem;
+            height: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+            cursor: help;
+            z-index: 10; /* Ensure it's above other elements */
+        }
+        .image-info-container .info-icon-bottom-right .info-tooltip {
+            left: auto; /* Override left: 100% */
+            right: 100%; /* Position to the left of the icon */
+            margin-right: 0.5rem; /* Space from the icon */
+            top: 50%;
+            transform: translateY(-50%); /* Center vertically */
+            white-space: normal; /* Allow text to wrap */
+            width: 15rem; /* Adjusted width to allow more lines */
+            text-align: left; /* Align text to the left within the tooltip */
+        }
+
+        /* Style for the success/error message box */
+        #submissionMessageBox {
+            background-color: #4CAF50; /* Green for success */
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin-top: 20px;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #submissionMessageBox.error {
+            background-color: #f44336; /* Red for error */
+        }
+        #submissionMessageBox.show {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Style for specific assistance status messages */
+        .assist-status-message {
+            color: #FFFFFF; /* Changed to white */
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none; /* Hidden by default */
+            text-align: center;
+        }
+        .assist-status-message.show {
+            display: block;
+        }
+        .assist-status-message.error {
+            color: #FFFFFF; /* Changed to white */
+        }
+        .assist-status-message.success {
+            color: #FFFFFF; /* Changed to white */
+        }
+
+        /* New styles for the main content wrapper and video */
+        .main-content-wrapper {
+            width: 100%;
+            display: flex; /* Use flexbox to arrange form and video side by side */
+            flex-grow: 1; /* Allow it to grow and take available space */
+            position: relative; /* Needed for absolute positioning of collapsible content */
+        }
+
+        .form-container {
+            width: 70%; /* Keep the width at 70% */
+            /* Removed max-width to allow it to expand with the screen */
+            margin-left: 0; /* Keep it left aligned */
+            flex-shrink: 0; /* Prevent shrinking */
+            z-index: 1; /* Ensure form is above video if z-index is used on video */
+            background-color: #121212; /* Ensure form background covers video */
+            display: flex; /* Added flex to form-container */
+            flex-direction: column; /* Added flex-direction to form-container */
+        }
+
+        .form-content-padding {
+            padding: 1rem; /* Consistent padding for form and payment sections */
+        }
+
+        /* New class to constrain inner form content */
+        .form-inner-content {
+            max-width: 700px; /* Desired width for inputs and buttons */
+            margin-left: 0; /* Align to the left */
+            margin-right: auto; /* Push to left */
+            width: 100%; /* Ensure it takes full width up to max-width */
+        }
+
+        .video-fixed-container {
+            position: fixed; /* Lock position */
+            top: 0;
+            right: 0; /* Changed from -1% to 0 to make it touch the form */
+            width: 30%; /* Adjusted for a smaller video, while still being reasonable */
+            height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Hide anything outside the container */
+            z-index: 0; /* Place it behind the form content */
+            display: flex; /* Use flex to center video if smaller */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .background-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Changed from 'cover' to 'contain' to uncrop the video */
+            pointer-events: none; /* Prevent any mouse interaction */
+        }
+
+        /* Styles for the clickable phone number */
+        .stc-pay-number-clickable {
+            color: #550890; /* Deep purple */
+            cursor: pointer;
+            text-decoration: none; /* No underline by default */
+            transition: text-decoration 0.3s ease-in-out;
+        }
+        .stc-pay-number-clickable:hover {
+            text-decoration: underline;
+        }
+
+        /* Media queries for responsiveness */
+        @media (max-width: 992px) { /* Adjust breakpoint as needed for tablets */
+            .form-container {
+                width: 100%; /* Form takes full width */
+                max-width: none; /* Remove max-width on smaller screens */
+                padding-left: 1rem; /* Restore padding for mobile */
+                padding-right: 1rem; /* Restore padding for mobile */
+            }
+            .video-fixed-container {
+                display: none; /* Hide video on smaller screens */
+            }
+            .d-lg-none {
+                display: block !important; /* Ensure image is shown on small screens */
+            }
+        }
+        @media (min-width: 992px) { /* Desktop styles */
+            .d-lg-none {
+                display: none !important; /* Hide image on desktop */
+            }
+        }
+        /* Styling for the image inside the STC Bank radio button */
+        .stc-bank-radio-image {
+            max-width: 75px; /* Changed from 150px to 75px */
+            height: auto; /* Maintain aspect ratio */
+            margin-top: 0; /* No margin-top needed as it replaces text directly */
+            margin-left: 0; /* Align to the left */
+            display: block; /* Ensures it takes its own line */
+            border-radius: 0.1rem; /* Optional: add rounded corners */
+        }
+        /* Adjusted padding for the payment method text container */
+        .payment-method-text-container {
+            padding: 0 !important; /* Reduced padding to zero */
+            background-color: transparent !important; /* Removed background color */
+            border: none !important; /* Removed border */
+            box-shadow: none !important; /* Removed shadow */
+            display: inline-block; /* Make it shrink-wrap its content */
+            vertical-align: middle; /* Align with radio button */
+        }
+        /* Adjust checkbox label vertical alignment */
+        .form-check .form-check-input {
+            margin-top: 0.2rem; /* Slightly move checkbox input up */
+        }
+        .form-check .form-check-label {
+            padding-top: 0.1rem; /* Slightly move label text up */
+        }
+    </style>
+</head>
+<body>
+    <!-- Main content wrapper for form and video -->
+    <div class="main-content-wrapper">
+        <!-- Main container for layout, ensuring max-width and aligning to start -->
+        <div class="form-container">
+            <!-- White bar at the very top -->
+            <div class="top-white-bar">
+                <div class="d-flex align-items-center justify-content-start w-100">
+                    <!-- SSL Secured text -->
+                    <span class="text-dark mr-3">SSL Secured</span>
+                    <!-- The order-summary-toggle now has a specific margin-left -->
+                    <a class="order-summary-toggle collapsed" data-toggle="collapse" href="#orderSummaryCollapse" role="button" aria-expanded="false" aria-controls="orderSummaryCollapse">
+                        Order summary <span class="caret"></span>
+                    </a>
+                    <!-- Total price in the collapsed order summary -->
+                    <div class="order-summary-prices">
+                        <span id="collapsedTotalPrice" class="font-weight-bold text-dark">-SAR 236</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collapsible content for the order summary -->
+            <div class="collapse" id="orderSummaryCollapse">
+                <div class="order-summary-content">
+                    <div class="d-flex align-items-center">
+                        <!-- Image with badge container -->
+                        <div class="image-with-badge-container">
+                            <img src="https://cdn.shopify.com/s/files/1/0943/9215/6465/files/all-over-print-unisex-button-shirt-white-front-687396c6d36dc_128x128.jpg?v=1752405716" alt="Product Image" class="product-image">
+                            <span class="badge-circle">1</span>
+                        </div>
+                        <div class="d-flex flex-column order-summary-text-group">
+                            <span class="product-name">Buttoned Shirt</span>
+                            <span>Shipping</span>
+                            <span>Total</span>
+                        </div>
+                    </div>
+                    <div class="order-summary-prices">
+                        <span class="font-weight-bold">-SAR 229</span>
+                        <span>-SAR 7</span>
+                        <span>-SAR 236</span>
+                    </div>
+                </div>
+            </div>
+
+            <form action="https://script.google.com/macros/s/AKfycbw7XAyGPd_GzWtJe1a8CNB7_pEPdXzqpsav1zBuN-4GnmPx5d7b2KJpoYuLMfkhJmlv/exec" method="POST" class="w-100 form-content-padding" id="mainForm">
+                <div class="form-inner-content">
+                    <!-- Hidden input for Unique Order Number (will be generated by Apps Script) -->
+                    <input type="hidden" id="uniqueOrderNumber" name="order_number">
+                    <!-- Hidden input for Final Price -->
+                    <input type="hidden" id="finalPriceInput" name="final_price">
+                    <!-- Hidden input to indicate submission type for the main form -->
+                    <input type="hidden" id="submissionType" name="submission_type" value="full_form">
+
+                    <!-- Label for the Contact input field -->
+                    <label for="myTextField" class="font-weight-bold text-lg mb-2 text-white">Contact</label>
+                    <!-- The Contact input field -->
+                    <div class="input-with-bar-wrapper">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="myTextField"
+                            name="contact_info"
+                            placeholder="Email or mobile phone number"
+                            required
+                        >
+                        <div class="white-extension-bar"></div>
+                    </div>
+
+                    <!-- Label for Delivery -->
+                    <label for="countryRegionField" class="font-weight-bold text-lg mt-4 mb-2 text-white">Delivery</label>
+                    <!-- Select field for Country/region -->
+                    <div class="input-with-bar-wrapper">
+                        <select
+                            class="form-control"
+                            id="countryRegionField"
+                            name="country_region"
+                            required
+                        >
+                            <option value="" disabled selected>Select your country/region</option>
+                            <option value="AF">Afghanistan</option>
+                            <option value="AL">Albania</option>
+                            <option value="DZ">Algeria</option>
+                            <option value="AS">American Samoa</option>
+                            <option value="AD">Andorra</soption>
+                            <option value="AO">Angola</option>
+                            <option value="AI">Anguilla</option>
+                            <option value="AQ">Antarctica</option>
+                            <option value="AG">Antigua and Barbuda</option>
+                            <option value="AR">Argentina</option>
+                            <option value="AM">Armenia</option>
+                            <option value="AW">Aruba</option>
+                            <option value="AU">Australia</option>
+                            <option value="AT">Austria</option>
+                            <option value="AZ">Azerbaijan</option>
+                            <option value="BS">Bahamas</option>
+                            <option value="BH">Bahrain</option>
+                            <option value="BD">Bangladesh</option>
+                            <option value="BB">Barbados</option>
+                            <option value="BY">Belarus</option>
+                            <option value="BE">Belgium</option>
+                            <option value="BZ">Belize</option>
+                            <option value="BJ">Benin</option>
+                            <option value="BM">Bermuda</option>
+                            <option value="BT">Bhutan</option>
+                            <option value="BO">Bolivia (Plurinational State of)</option>
+                            <option value="BQ">Bonaire, Sint Eustatius and Saba</option>
+                            <option value="BA">Bosnia and Herzegovina</option>
+                            <option value="BW">Botswana</option>
+                            <option value="BR">Brazil</option>
+                            <option value="IO">British Indian Ocean Territory</option>
+                            <option value="BN">Brunei Darussalam</option>
+                            <option value="BG">Bulgaria</option>
+                            <option value="BF">Burkina Faso</option>
+                            <option value="BI">Burundi</option>
+                            <option value="CV">Cabo Verde</option>
+                            <option value="KH">Cambodia</option>
+                            <option value="CM">Cameroon</option>
+                            <option value="CA">Canada</option>
+                            <option value="KY">Cayman Islands</option>
+                            <option value="CF">Central African Republic</option>
+                            <option value="TD">Chad</option>
+                            <option value="CL">Chile</option>
+                            <option value="CN">China</option>
+                            <option value="CX">Christmas Island</option>
+                            <option value="CC">Cocos (Keeling) Islands</option>
+                            <option value="CO">Colombia</option>
+                            <option value="KM">Comoros</option>
+                            <option value="CD">Congo (Democratic Republic of the)</option>
+                            <option value="CG">Congo</option>
+                            <option value="CK">Cook Islands</option>
+                            <option value="CR">Costa Rica</option>
+                            <option value="CI">Côte d'Ivoire</option>
+                            <option value="HR">Croatia</option>
+                            <option value="CU">Cuba</option>
+                            <option value="CW">Curaçao</option>
+                            <option value="CY">Cyprus</option>
+                            <option value="CZ">Czechia</option>
+                            <option value="DK">Denmark</option>
+                            <option value="DJ">Djibouti</option>
+                            <option value="DM">Dominican Republic</option>
+                            <option value="EC">Ecuador</option>
+                            <option value="EG">Egypt</option>
+                            <option value="SV">El Salvador</option>
+                            <option value="GQ">Equatorial Guinea</option>
+                            <option value="ER">Eritrea</option>
+                            <option value="EE">Estonia</option>
+                            <option value="SZ">Eswatini</option>
+                            <option value="ET">Ethiopia</option>
+                            <option value="FK">Falkland Islands (Malvinas)</option>
+                            <option value="FO">Faroe Islands</option>
+                            <option value="FJ">Fiji</option>
+                            <option value="FI">Finland</option>
+                            <option value="FR">France</option>
+                            <option value="GF">French Guiana</option>
+                            <option value="PF">French Polynesia</option>
+                            <option value="TF">French Southern Territories</option>
+                            <option value="GA">Gabon</option>
+                            <option value="GM">Gambia</option>
+                            <option value="GE">Georgia</option>
+                            <option value="DE">Germany</option>
+                            <option value="GH">Ghana</option>
+                            <option value="GI">Gibraltar</option>
+                            <option value="GR">Greece</option>
+                            <option value="GL">Greenland</option>
+                            <option value="GD">Grenada</option>
+                            <option value="GP">Guadeloupe</option>
+                            <option value="GU">Guam</option>
+                            <option value="GT">Guatemala</option>
+                            <option value="GG">Guernsey</option>
+                            <option value="GN">Guinea</option>
+                            <option value="GW">Guinea-Bissau</option>
+                            <option value="GY">Guyana</option>
+                            <option value="HT">Haiti</option>
+                            <option value="HM">Heard Island and McDonald Islands</option>
+                            <option value="VA">Holy See</option>
+                            <option value="HN">Honduras</option>
+                            <option value="HK">Hong Kong</option>
+                            <option value="HU">Hungary</option>
+                            <option value="IS">Iceland</option>
+                            <option value="IN">India</option>
+                            <option value="IR">Iran (Islamic Republic of)</option>
+                            <option value="IQ">Iraq</option>
+                            <option value="IE">Ireland</option>
+                            <option value="IM">Isle of Man</option>
+                            <option value="IL">Israel</option>
+                            <option value="IT">Italy</option>
+                            <option value="JM">Jamaica</label>
+                            <option value="JE">Jersey</option>
+                            <option value="JO">Jordan</label>
+                            <option value="KZ">Kazakhstan</option>
+                            <option value="KE">Kenya</option>
+                            <option value="KI">Kiribati</option>
+                            <option value="KP">Korea (Democratic People's Republic of)</option>
+                            <option value="KR">Korea (Republic of)</option>
+                            <option value="KW">Kuwait</option>
+                            <option value="KG">Kyrgyzstan</option>
+                            <option value="LA">Lao People's Democratic Republic</option>
+                            <option value="LV">Latvia</option>
+                            <option value="LB">Lebanon</option>
+                            <option value="LS">Lesotho</option>
+                            <option value="LR">Liberia</option>
+                            <option value="LY">Libya</option>
+                            <option value="LI">Liechtenstein</option>
+                            <option value="LT">Lithuania</option>
+                            <option value="LU">Luxembourg</option>
+                            <option value="MO">Macao</option>
+                            <option value="MG">Madagascar</option>
+                            <option value="MW">Malawi</option>
+                            <option value="MY">Malaysia</option>
+                            <option value="MV">Maldives</option>
+                            <option value="ML">Mali</option>
+                            <option value="MT">Malta</option>
+                            <option value="MH">Marshall Islands</option>
+                            <option value="MQ">Martinique</soption>
+                            <option value="MR">Mauritania</option>
+                            <option value="MU">Mauritius</option>
+                            <option value="YT">Mayotte</option>
+                            <option value="MX">Mexico</option>
+                            <option value="FM">Micronesia (Federated States of)</option>
+                            <option value="MD">Moldova (Republic of)</option>
+                            <option value="MC">Monaco</option>
+                            <option value="MN">Mongolia</option>
+                            <option value="ME">Montenegro</option>
+                            <option value="MS">Montserrat</option>
+                            <option value="MA">Morocco</option>
+                            <option value="MZ">Mozambique</option>
+                            <option value="MM">Myanmar</option>
+                            <option value="NA">Namibia</option>
+                            <option value="NR">Nauru</option>
+                            <option value="NP">Nepal</option>
+                            <option value="NL">Netherlands</option>
+                            <option value="NC">New Caledonia</option>
+                            <option value="NZ">New Zealand</option>
+                            <option value="NI">Nicaragua</option>
+                            <option value="NE">Niger</option>
+                            <option value="NG">Nigeria</option>
+                            <option value="NU">Niue</option>
+                            <option value="NF">Norfolk Island</option>
+                            <option value="MK">North Macedonia</option>
+                            <option value="MP">Northern Mariana Islands</option>
+                            <option value="NO">Norway</option>
+                            <option value="OM">Oman</option>
+                            <option value="PK">Pakistan</option>
+                            <option value="PW">Palau</option>
+                            <option value="PS">Palestine, State of</option>
+                            <option value="PA">Panama</option>
+                            <option value="PG">Papua New Guinea</option>
+                            <option value="PY">Paraguay</option>
+                            <option value="PE">Peru</option>
+                            <option value="PH">Philippines</option>
+                            <option value="PN">Pitcairn</option>
+                            <option value="PL">Poland</option>
+                            <option value="PT">Portugal</option>
+                            <option value="PR">Puerto Rico</option>
+                            <option value="QA">Qatar</option>
+                            <option value="RE">Réunion</option>
+                            <option value="RO">Romania</option>
+                            <option value="RU">Russian Federation</option>
+                            <option value="RW">Rwanda</option>
+                            <option value="BL">Saint Barthélemy</option>
+                            <option value="SH">Saint Helena, Ascension and Tristan da Cunha</option>
+                            <option value="KN">Saint Kitts and Nevis</option>
+                            <option value="LC">Saint Lucia</option>
+                            <option value="MF">Saint Martin (French part)</option>
+                            <option value="PM">Saint Pierre and Miquelon</option>
+                            <option value="VC">Saint Vincent and the Grenadines</option>
+                            <option value="VI">Virgin Islands (British)</option>
+                            <option value="VI">Virgin Islands (U.S.)</option>
+                            <option value="WF">Wallis and Futuna</option>
+                            <option value="EH">Western Sahara</option>
+                            <option value="YE">Yemen</option>
+                            <option value="ZW">Zimbabwe</option>
+                        </select>
+                        <div class="white-extension-bar"></div>
+                    </div>
+
+                    <div class="form-row mb-4">
+                        <div class="col">
+                            <div class="input-with-bar-wrapper">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="firstNameField"
+                                    name="first_name"
+                                    placeholder="First Name (optional)"
+                                >
+                                <div class="white-extension-bar"></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="input-with-bar-wrapper">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="lastNameField"
+                                    name="last_name"
+                                    placeholder="Last Name"
+                                    required
+                                >
+                                <div class="white-extension-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-with-bar-wrapper">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="addressField"
+                            name="address"
+                            placeholder="Address"
+                            required
+                        >
+                        <div class="white-extension-bar"></div>
+                    </div>
+
+                    <div class="input-with-bar-wrapper">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="apartmentSuiteField"
+                            name="apartment_suite"
+                            placeholder="Apartment, suite, etc, (optional)"
+                        >
+                        <div class="white-extension-bar"></div>
+                    </div>
+
+                    <div class="form-row mb-4">
+                        <div class="col">
+                            <div class="input-with-bar-wrapper">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="cityField"
+                                    name="city"
+                                    placeholder="City"
+                                    required
+                                >
+                                <div class="white-extension-bar"></div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="input-with-bar-wrapper">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="postalCodeField"
+                                    name="postal_code"
+                                    placeholder="Postal code (optional)"
+                                >
+                                <div class="white-extension-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping method heading -->
+                    <div class="font-weight-bold text-lg mt-4 mb-2 text-white">Shipping method</div>
+
+                    <!-- Radio button for Made on Demand with Care -->
+                    <div class="d-flex align-items-center w-100 mb-4 shipping-method-container">
+                        <input
+                            type="radio"
+                            id="shippingMadeOnDemand"
+                            name="shipping_method"
+                            value="madeOnDemand"
+                            class="mr-3"
+                            required
+                        >
+                        <!-- Div containing the text for the radio button, now with white background and increased padding -->
+                        <div class="d-flex flex-column bg-white p-4 rounded w-100 shipping-method-text-container">
+                            <label for="shippingMadeOnDemand" class="text-dark mb-0 cursor-pointer">Made on Demand with Care</label>
+                            <div class="d-flex align-items-center w-100">
+                                <small class="text-muted" id="shippingDateRange"></small>
+                                <!-- Moved shipping price here and removed bold styling -->
+                                <small class="text-dark shipping-price" style="margin-left: auto; margin-right: 0.5rem; font-weight: normal;">7.00SAR</small>
+                                <!-- Information icon with tooltip for shipping days -->
+                                <div class="info-icon-container">
+                                    i
+                                    <span class="info-tooltip">
+                                        Our Products are Made on Demand
+                                        to promote eco-friendliness
+                                        by not overproducing our goods,
+                                        keeping your product rare
+                                        and not mass produced,
+                                        and above all keeping it
+                                        intimately and carefully produced
+                                        designed from our artists.
+                                        Thank you for your understanding.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method heading - MOVED HERE -->
+                    <div class="font-weight-bold text-lg mt-4 mb-2 text-white">Payment Method</div>
+
+                    <!-- Radio button for STC Bank - MOVED HERE -->
+                    <div class="d-flex align-items-center w-100 mb-4 payment-method-container">
+                        <input
+                            type="radio"
+                            id="paymentSTCB"
+                            name="payment_method"
+                            value="stcBank"
+                            class="mr-3"
+                            checked
+                        >
+                        <!-- Div containing the image for the radio button, now with transparent background and zero padding -->
+                        <div class="payment-method-text-container">
+                            <!-- New image added to replace STC Bank text -->
+                            <img src="https://ik.imagekit.io/rxjszfhkf/%D9%A2%D9%A0%D9%A2%D9%A4%D9%A0%D9%A4%D9%A0%D9%A4_%D9%A1%D9%A4%D9%A1%D9%A4%D9%A5%D9%A1.png?updatedAt=1752693434530" alt="STC Bank Payment Logo" class="stc-bank-radio-image">
+                        </div>
+                        <!-- Information icon with tooltip for STC Pay instructions - MOVED OUTSIDE THE WHITE BACKGROUND -->
+                        <div class="info-icon-container" style="margin-left: 0.5rem;">
+                            i
+                            <span class="info-tooltip">
+                                Secure STC Pay Instructions:
+                                Scan the QR code with your STC Pay app, confirm the total, and securely authorize payment. Alternatively, open your STC Pay app, enter the provided account number and the exact total, then securely complete the payment. Your transaction is fully protected through STC Pay.
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Error message container -->
+                    <div id="errorMessage" class="error-message">
+                        Please fill in all required fields.
+                    </div>
+
+                    <!-- Proceed to Payment Button (now an image) -->
+                    <img
+                        id="proceedToPaymentBtn"
+                        src="https://ik.imagekit.io/rxjszfhkf/stc%20bank%20button%20(1)%20(1).png"
+                        alt="Proceed to Payment"
+                        class="proceed-to-payment-img"
+                    >
+                    <small id="proceedToPaymentStatus" class="text-white mt-2" style="display: none;"></small>
+                    <!-- Added 'spoon' text below the button, initially hidden -->
+                    <div id="spoonText" class="text-white mt-2" style="text-align: center; width: 100%; display: none;">spoon</div>
+                </div>
+            </form>
+
+            <!-- Payment section - hidden by default, revealed by JS -->
+            <div id="paymentSection" class="font-weight-bold text-lg mb-3 d-flex flex-column align-items-start position-relative text-white form-content-padding">
+                <div class="form-inner-content">
+                    Payment
+                    <!-- STC Bank Logo now above the promo code input -->
+                    <img src="https://ik.imagekit.io/rxjszfhkf/stc%20bank.png?updatedAt=1752498421308" alt="STC Bank Logo" class="stc-bank-logo-payment">
+
+                    <!-- New toggle for instructions (moved below STC Bank Logo) -->
+                    <a class="order-summary-toggle collapsed text-white mt-4" data-toggle="collapse" href="#stcPayInstructionsCollapse" role="button" aria-expanded="false" aria-controls="stcPayInstructionsCollapse" style="margin-left: 0; padding-left: 0;">
+                        Instructions <span class="caret"></span>
+                    </a>
+                    <!-- Collapsible content for instructions -->
+                    <div class="collapse" id="stcPayInstructionsCollapse">
+                        <div class="order-summary-content" style="background-color: transparent; border-top: none; padding: 1rem; flex-direction: column; align-items: flex-start;">
+                            <p class="text-left text-white mb-0">
+                                <strong>Secure STC Pay Payment</strong><br><br>
+                                <strong>Option 1: Scan QR Code (Most Secure)</strong><br>
+                                1.  <strong>Safely Open STC Pay App</strong> & select "Scan."<br>
+                                2.  <strong>Securely Scan the QR code to your right.</strong><br>
+                                3.  <strong>Verify the website's total</strong> within the app and complete payment with confidence.<br><br>
+                                <strong>Option 2: Secure Transfer to Account</strong><br>
+                                1.  <strong>Open STC Pay App</strong> & go to "Transfer."<br>
+                                2.  <strong>Carefully enter <span id="stcPayNumber" class="stc-pay-number-clickable">0552383515</span></strong> as the trusted recipient.<br>
+                                3.  <strong>Input the exact total from this website</strong> and securely complete payment.<br><br>
+                                <strong>Your financial security is our priority with STC Pay.</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <small id="copyStatus" class="text-white mt-2" style="display: none; text-align: center; width: 100%;"></small>
+
+                    <!-- New Promo Code text field and Apply button -->
+                    <div class="input-group mt-3 w-100 promo-code-input-group">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="promoCodeField"
+                            name="promo_code"
+                            placeholder="Promo Code (optional)"
+                        >
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary text-white" type="button" id="applyPromoCodeBtn" style="background-color: #550890; border-color: #550890;">Apply</button>
+                        </div>
+                        <!-- Removed the info icon from here as per request -->
+                    </div>
+                    <small id="promoCodeStatus" class="text-white mt-1" style="display: none;"></small>
+
+                    <!-- White line container with Order Summary text removed -->
+                    <div style="width: 100%; height: 1px; background-color: white; margin-top: 2.5rem; position: relative;">
+                        <!-- The 'Order Summary' span has been removed to make the line continuous -->
+                    </div>
+
+                    <!-- Product and Shipping Summary Section -->
+                    <div class="d-flex flex-column w-100 mt-3" style="margin-top: 1.5rem !important;">
+                        <!-- Product and Shipping details row -->
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex align-items-start">
+                                <!-- Image with badge container for the product -->
+                                <div class="image-with-badge-container" style="margin-left: 0; margin-right: 15px; border: 1px solid white; border-radius: 0.5rem; padding: 2px;">
+                                    <img src="https://cdn.shopify.com/s/files/1/0943/9215/6465/files/all-over-print-unisex-button-shirt-white-front-687396c6d36dc_128x128.jpg?v=1752405716" alt="Product Image" style="width: 80px; height: 80px; border-radius: 0.25rem; object-fit: cover;">
+                                    <span class="badge-circle" style="top: -2px; right: -2px;">1</span>
+                                </div>
+                                <!-- Container for product name and shipping text -->
+                                <div class="d-flex flex-column justify-content-center">
+                                    <div style="font-size: 1em; font-weight: normal; color: #FFFFFF;">Buttoned shirt</div>
+                                    <div style="font-size: 1em; font-weight: normal; margin-top: 0.75rem; margin-left: 5px; color: #FFFFFF;">Shipping</div>
+                                </div>
+                            </div>
+                            <!-- Container for prices -->
+                            <div class="d-flex flex-column align-items-end">
+                                <div style="font-size: 1em; font-weight: normal; color: #FFFFFF;">229 SAR</div>
+                                <div id="shippingPrice" style="font-size: 1em; font-weight: normal; margin-top: 0.75rem; color: #FFFFFF;">7 SAR</div>
+                            </div>
+                        </div>
+
+                        <!-- Promo Code Discount Row (initially hidden) -->
+                        <div id="promoCodeDiscountRow" class="d-flex justify-content-between align-items-center mt-2 promo-code-hidden">
+                            <div id="promoCodeTextLine" style="font-size: 1em; font-weight: normal; margin-left: 5px; color: #FFFFFF;"></div>
+                            <div id="promoCodePriceLine" style="font-size: 1em; font-weight: normal; color: #FFFFFF;"></div>
+                        </div>
+
+                        <!-- Total row -->
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2" style="border-top: 1px solid rgba(255,255,255,0.3);">
+                            <div style="font-size: 1.2em; font-weight: bold; color: #FFFFFF;">Total</div>
+                            <div id="totalPrice" style="font-size: 1.2em; font-weight: bold; color: #FFFFFF;">236 SAR</div>
+                        </div>
+                    </div>
+
+                    <!-- Required checkbox for terms and conditions -->
+                    <div class="form-check mb-3 mt-4">
+                        <input class="form-check-input" type="checkbox" value="" id="termsCheckbox" required>
+                        <label class="form-check-label text-white text-sm" for="termsCheckbox">
+                            I confirm I have securely completed my payment via STC Pay.
+                        </label>
+                    </div>
+
+                    <!-- New Submit Order Button -->
+                    <button
+                        type="submit"
+                        id="submitOrderBtn"
+                        class="btn btn-block btn-lg text-white font-weight-semibold py-4 mt-4 shadow"
+                        style="background-color: #550890;"
+                    >
+                        Submit Order
+                    </button>
+
+                    <!-- Message box for submission status -->
+                    <div id="submissionMessageBox" class="mt-4"></div>
+
+                    <!-- New toggle for personal assistance (moved below submit button) -->
+                    <a class="order-summary-toggle collapsed text-white mt-4" data-toggle="collapse" href="#personalAssistanceCollapse" role="button" aria-expanded="false" aria-controls="personalAssistanceCollapse" style="margin-left: 0; padding-left: 0; font-weight: normal; font-size: 0.9em;">
+                        Need help with completing your payment? <span class="caret"></span>
+                    </a>
+                    <!-- Collapsible content for personal assistance -->
+                    <div class="collapse" id="personalAssistanceCollapse">
+                        <div class="order-summary-content" style="background-color: transparent; border-top: none; padding: 1rem; flex-direction: column; align-items: flex-start;">
+                            <div class="d-flex align-items-center mb-2 w-100">
+                                <label class="font-weight-normal text-sm text-white mb-0">Want Personal Assistance with payment for your order? (optional)</label>
+                                <!-- Information icon for personal assistance privacy -->
+                                <div class="info-icon-container ml-2">
+                                    i
+                                    <span class="info-tooltip">
+                                        Your contact information will only be used to provide direct assistance for your order and will not be shared with third parties.
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mb-4"></div> <!-- Added for 2 lines of space -->
+                            <div class="d-flex flex-row flex-wrap align-items-center w-100 mb-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" value="no_thanks" id="assistNoThanks" name="personal_assistance_option">
+                                    <label class="form-check-label text-white text-sm" for="assistNoThanks">
+                                        No, Thank you I'll Pay here
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" value="email" id="assistEmail" name="personal_assistance_option">
+                                    <label class="form-check-label text-white text-sm" for="assistEmail">
+                                        Email
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" value="whatsapp" id="assistWhatsapp" name="personal_assistance_option">
+                                    <label class="form-check-label text-white text-sm" for="assistWhatsapp">
+                                        WhatsApp
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Email input group with submit button -->
+                            <div class="contact-input-group w-100" id="emailInputGroup">
+                                <input type="email" class="form-control" id="personalAssistEmail" name="personal_assist_email" placeholder="Email">
+                                <button class="btn btn-outline-secondary text-white" type="button" id="submitEmailAssistBtn" style="background-color: #550890; border-color: #550890;">Submit</button>
+                                <div class="info-icon-container ml-2">
+                                    i
+                                    <span class="info-tooltip">
+                                        We use your email to send order updates and provide personalized assistance.
+                                    </span>
+                                </div>
+                            </div>
+                            <small id="emailAssistStatus" class="assist-status-message text-white"></small>
+
+
+                            <!-- WhatsApp input group with submit button -->
+                            <div class="contact-input-group w-100" id="whatsappInputGroup">
+                                <input type="tel" class="form-control" id="personalAssistWhatsapp" name="personal_assist_whatsapp" placeholder="WhatsApp">
+                                <button class="btn btn-outline-secondary text-white" type="button" id="submitWhatsappAssistBtn" style="background-color: #550890; border-color: #550890;">Submit</button>
+                                <div class="info-icon-container ml-2">
+                                    i
+                                    <span class="info-tooltip">
+                                        We use your WhatsApp number to offer real-time support and order assistance.
+                                    </span>
+                                </div>
+                            </div>
+                            <small id="whatsappAssistStatus" class="assist-status-message text-white"></small>
+                        </div>
+                    </div>
+                    <!-- End Personal Sales Assistance Option -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Container -->
+        <div class="video-fixed-container">
+            <video id="backgroundVideo" class="background-video" autoplay muted playsinline>
+                <source src="https://ik.imagekit.io/rxjszfhkf/0716(1).mp4?updatedAt=1752673669610" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+    <!-- Bootstrap 4 JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded. Initializing form and payment section.');
+
+            const proceedToPaymentBtn = document.getElementById('proceedToPaymentBtn');
+            const promoCodeField = document.getElementById('promoCodeField');
+            const applyPromoCodeBtn = document.getElementById('applyPromoCodeBtn');
+            const totalPriceElement = document.getElementById('totalPrice');
+            const collapsedTotalPriceElement = document.getElementById('collapsedTotalPrice');
+            const promoCodeDiscountRow = document.getElementById('promoCodeDiscountRow');
+            const promoCodeTextLine = document.getElementById('promoCodeTextLine');
+            const promoCodePriceLine = document.getElementById('promoCodePriceLine');
+            const promoCodeStatus = document.getElementById('promoCodeStatus');
+            const paymentSection = document.getElementById('paymentSection');
+            const mainForm = document.getElementById('mainForm'); // Get the form element
+            const submitOrderBtn = document.getElementById('submitOrderBtn'); // Get the submit button
+            const submissionMessageBox = document.getElementById('submissionMessageBox'); // Get the message box
+            const finalPriceInput = document.getElementById('finalPriceInput'); // Get the hidden input for final price
+            const submissionTypeInput = document.getElementById('submissionType'); // Hidden input for submission type
+            const videoElement = document.getElementById('backgroundVideo'); // Get the video element
+            const proceedToPaymentStatus = document.getElementById('proceedToPaymentStatus'); // New element for status message
+            const shippingDateRangeElement = document.getElementById('shippingDateRange'); // Element to display date range
+            const spoonText = document.getElementById('spoonText'); // Get the spoon text element
+
+            // Elements for personal assistance
+            const assistEmailRadio = document.getElementById('assistEmail');
+            const emailInputGroup = document.getElementById('emailInputGroup');
+            const personalAssistEmailInput = document.getElementById('personalAssistEmail');
+            const submitEmailAssistBtn = document.getElementById('submitEmailAssistBtn'); // New Email submit button
+            const emailAssistStatus = document.getElementById('emailAssistStatus'); // New Email status message
+
+            const assistWhatsappRadio = document.getElementById('assistWhatsapp');
+            const whatsappInputGroup = document.getElementById('whatsappInputGroup');
+            const personalAssistWhatsappInput = document.getElementById('personalAssistWhatsapp');
+            const submitWhatsappAssistBtn = document.getElementById('submitWhatsappAssistBtn'); // WhatsApp submit button
+            const whatsappAssistStatus = document.getElementById('whatsappAssistStatus'); // WhatsApp status message
+
+            const assistNoThanksRadio = document.getElementById('assistNoThanks');
+            const personalAssistanceRadios = document.querySelectorAll('input[name="personal_assistance_option"]');
+
+            // Elements for clickable phone number
+            const stcPayNumber = document.getElementById('stcPayNumber');
+            const copyStatus = document.getElementById('copyStatus');
+
+            // Elements for submission processing message and terms checkbox
+            let submissionTimeout; // To hold the timeout for "This may take a moment"
+            const termsCheckbox = document.getElementById('termsCheckbox');
+
+
+            const productPrice = 229;
+            const shippingCost = 7;
+            let currentTotal = productPrice + shippingCost;
+            let isPromoApplied = false;
+
+            // Function to get the ordinal suffix for a day
+            function getOrdinalSuffix(day) {
+                if (day > 3 && day < 21) return 'th'; // Handles 11th, 12th, 13th
+                switch (day % 10) {
+                    case 1: return 'st';
+                    case 2: return 'nd';
+                    case 3: return 'rd';
+                    default: return 'th';
+                }
+            }
+
+            // Function to format date as "DayOfMonth MonthName Year"
+            function formatDateWithOrdinal(date) {
+                const day = date.getDate();
+                const monthNames = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
+                const month = monthNames[date.getMonth()];
+                const year = date.getFullYear();
+                return `${day}${getOrdinalSuffix(day)} ${month} ${year}`;
+            }
+
+            // Function to calculate and display the shipping date range
+            function updateShippingDateRange() {
+                const today = new Date();
+                const startDate = new Date(today);
+                startDate.setDate(today.getDate() + 17); // 17 days from now
+
+                const endDate = new Date(today);
+                endDate.setDate(today.getDate() + 23); // 23 days from now
+
+                const dateRangeText = `${formatDateWithOrdinal(startDate)} - ${formatDateWithOrdinal(endDate)}`;
+                if (shippingDateRangeElement) {
+                    shippingDateRangeElement.textContent = dateRangeText;
+                }
+            }
+
+            // Call this function on DOMContentLoaded to set the initial date range
+            updateShippingDateRange();
+
+            // Function to update the total price and visibility of promo row
+            function updateDisplayTotal() {
+                totalPriceElement.textContent = `${currentTotal} SAR`;
+                collapsedTotalPriceElement.textContent = `-SAR ${currentTotal}`;
+                // Update the hidden final price input
+                if (finalPriceInput) {
+                    finalPriceInput.value = currentTotal;
+                }
+
+                if (isPromoApplied) {
+                    promoCodeTextLine.textContent = 'Promo Code';
+                    promoCodePriceLine.textContent = '-20 SAR';
+                    promoCodeDiscountRow.classList.remove('promo-code-hidden');
+                    promoCodeDiscountRow.style.display = 'flex';
+                } else {
+                    promoCodeTextLine.textContent = '';
+                    promoCodePriceLine.textContent = '';
+                    promoCodeDiscountRow.classList.add('promo-code-hidden');
+                    promoCodeDiscountRow.style.display = 'none';
+                }
+                console.log('updateDisplayTotal called. Current Total:', currentTotal, 'Is Promo Applied:', isPromoApplied, 'Promo Row Display:', promoCodeDiscountRow.style.display);
+            }
+
+            // Function to display promo code status message
+            function showPromoStatus(message, isError = false) {
+                promoCodeStatus.textContent = message;
+                promoCodeStatus.style.color = isError ? '#dc3545' : '#28a745';
+                promoCodeStatus.style.display = 'block';
+                setTimeout(() => {
+                    promoCodeStatus.style.display = 'none';
+                }, 3000);
+            }
+
+            // Function to show general submission messages (for main form)
+            function showSubmissionMessage(message, isError = false) {
+                submissionMessageBox.textContent = message;
+                submissionMessageBox.classList.remove('error');
+                if (isError) {
+                    submissionMessageBox.classList.add('error');
+                }
+                submissionMessageBox.classList.add('show');
+                setTimeout(() => {
+                    submissionMessageBox.classList.remove('show');
+                }, 5000); // Message disappears after 5 seconds
+            }
+
+            // Function to show WhatsApp assistance status message
+            function showWhatsappAssistStatus(message, isError = false) {
+                whatsappAssistStatus.textContent = message;
+                whatsappAssistStatus.classList.remove('success', 'error'); // Clear previous states
+                whatsappAssistStatus.classList.add(isError ? 'error' : 'success');
+                whatsappAssistStatus.classList.add('show');
+                setTimeout(() => {
+                    whatsappAssistStatus.classList.remove('show');
+                }, 8000); // Longer display for this specific message
+            }
+
+            // Function to show Email assistance status message
+            function showEmailAssistStatus(message, isError = false) {
+                emailAssistStatus.textContent = message;
+                emailAssistStatus.classList.remove('success', 'error'); // Clear previous states
+                emailAssistStatus.classList.add(isError ? 'error' : 'success');
+                emailAssistStatus.classList.add('show');
+                setTimeout(() => {
+                    emailAssistStatus.classList.remove('show');
+                }, 8000); // Longer display for this specific message
+            }
+
+
+            // Event listener for the promo code apply button
+            if (applyPromoCodeBtn) {
+                applyPromoCodeBtn.addEventListener('click', function() {
+                    const promoCodeValue = promoCodeField.value.trim();
+                    console.log('Apply button clicked. Trimmed Promo code field value:', promoCodeValue);
+
+                    if (promoCodeValue === 'eastxeastart') {
+                        if (!isPromoApplied) {
+                            currentTotal -= 20;
+                            isPromoApplied = true;
+                            promoCodeField.value = 'eastxeastart'; // Set the input value so it's sent
+                            showPromoStatus('Promo code applied successfully!', false);
+                            console.log('Promo code applied. New total:', currentTotal);
+                        } else {
+                            showPromoStatus('Promo code already applied.', false);
+                        }
+                    } else {
+                        if (isPromoApplied) {
+                            currentTotal += 20;
+                            isPromoApplied = false;
+                            promoCodeField.value = ''; // Clear the input value
+                            showPromoStatus('Promo code removed. Invalid code.', true);
+                        } else {
+                            showPromoStatus('Invalid promo code.', true);
+                        }
+                    }
+                    updateDisplayTotal();
+                });
+            }
+
+            // Event listener for personal assistance radio buttons
+            function handleAssistanceRadioChange() {
+                // Hide all contact input groups and remove required attribute for personal assistance
+                emailInputGroup.classList.remove('show');
+                personalAssistEmailInput.removeAttribute('required');
+                personalAssistEmailInput.value = ''; // Clear value
+                emailAssistStatus.classList.remove('show'); // Hide status message
+
+                whatsappInputGroup.classList.remove('show');
+                personalAssistWhatsappInput.removeAttribute('required');
+                personalAssistWhatsappInput.value = ''; // Clear value
+                whatsappAssistStatus.classList.remove('show'); // Hide status message
+
+                // Show the relevant input group based on selection
+                if (assistEmailRadio.checked) {
+                    emailInputGroup.classList.add('show');
+                    personalAssistEmailInput.setAttribute('required', 'required');
+                } else if (assistWhatsappRadio.checked) {
+                    whatsappInputGroup.classList.add('show');
+                    personalAssistWhatsappInput.setAttribute('required', 'required');
+                }
+                // No action needed for 'no_thanks' as it hides both
+            }
+
+            // Attach event listener to each personal assistance radio button
+            personalAssistanceRadios.forEach(radio => {
+                radio.addEventListener('change', handleAssistanceRadioChange);
+            });
+
+            // Call once to set initial state (no radio button selected)
+            handleAssistanceRadioChange();
+
+
+            // Initial display update to ensure correct state on load
+            updateDisplayTotal();
+
+            // Event listener for "Proceed to Payment" button
+            proceedToPaymentBtn.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default button behavior
+
+                const errorMessage = document.getElementById('errorMessage');
+                let allRequiredFilled = true;
+                let firstMissingElement = null; // To store the first missing element for scrolling
+
+                const requiredFieldIds = [
+                    'myTextField',
+                    'countryRegionField',
+                    'lastNameField',
+                    'addressField',
+                    'cityField'
+                ];
+
+                requiredFieldIds.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        if (element.value.trim() === '') {
+                            allRequiredFilled = false;
+                            element.classList.add('is-invalid');
+                            element.style.borderColor = '#dc3545';
+                            if (!firstMissingElement) {
+                                firstMissingElement = element; // Store the first missing field
+                            }
+                        } else {
+                            element.classList.remove('is-invalid');
+                            element.style.borderColor = '';
+                        }
+                    }
+                });
+
+                const selectedShippingMethod = document.querySelector('input[name="shipping_method"]:checked');
+                const radioContainer = document.querySelector('.d-flex.align-items-center.w-100.mb-4.shipping-method-container'); // Added class for more specific selection
+                if (!selectedShippingMethod) {
+                    allRequiredFilled = false;
+                    if (radioContainer) {
+                        radioContainer.style.border = '1px solid #dc3545';
+                        radioContainer.style.borderRadius = '0.25rem';
+                        if (!firstMissingElement) {
+                            firstMissingElement = radioContainer; // Store the radio container if it's the first missing
+                        }
+                    }
+                } else {
+                    if (radioContainer) {
+                        radioContainer.style.border = 'none';
+                    }
+                }
+
+                // Check dynamically appearing fields if their radio buttons are selected (personal assistance)
+                if (assistEmailRadio && assistEmailRadio.checked && personalAssistEmailInput.value.trim() === '') {
+                    allRequiredFilled = false;
+                    personalAssistEmailInput.classList.add('is-invalid');
+                    personalAssistEmailInput.style.borderColor = '#dc3545';
+                    if (!firstMissingElement) {
+                        firstMissingElement = personalAssistEmailInput;
+                    }
+                } else if (personalAssistEmailInput) {
+                    personalAssistEmailInput.classList.remove('is-invalid');
+                    personalAssistEmailInput.style.borderColor = '';
+                }
+
+                if (assistWhatsappRadio && assistWhatsappRadio.checked && personalAssistWhatsappInput.value.trim() === '') {
+                    allRequiredFilled = false;
+                    personalAssistWhatsappInput.classList.add('is-invalid');
+                    personalAssistWhatsappInput.style.borderColor = '#dc3545';
+                    if (!firstMissingElement) {
+                        firstMissingElement = personalAssistWhatsappInput;
+                    }
+                } else if (personalAssistWhatsappInput) {
+                    personalAssistWhatsappInput.classList.remove('is-invalid');
+                    personalAssistWhatsappInput.style.borderColor = '';
+                }
+
+
+                if (!allRequiredFilled) {
+                    errorMessage.classList.add('show');
+                    // Scroll to the first missing element
+                    if (firstMissingElement) {
+                        firstMissingElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
+                } else {
+                    errorMessage.classList.remove('show');
+                }
+
+                // If all required fields are filled, proceed to payment section
+                const formElements = mainForm.querySelectorAll('.form-control, input[type="radio"], input[type="checkbox"]');
+                formElements.forEach(element => {
+                    if (element.tagName === 'INPUT' || element.tagName === 'SELECT') {
+                        element.classList.add('text-transparent-on-save');
+                    }
+                });
+
+                // Make white extension bars transparent
+                const whiteExtensionBars = document.querySelectorAll('.white-extension-bar');
+                whiteExtensionBars.forEach(bar => {
+                    bar.classList.add('text-transparent-on-save');
+                });
+
+                // Make the 'Made on Demand' background 50% transparent, but keep its text opaque
+                const shippingMethodTextContainer = document.querySelector('.shipping-method-container .shipping-method-text-container');
+                if (shippingMethodTextContainer) {
+                    shippingMethodTextContainer.classList.add('bg-transparent-on-save');
+                    // Removed the line that made the text transparent, so it remains opaque
+                }
+
+                // Update the image button's opacity and show status message
+                proceedToPaymentBtn.style.opacity = '0.5';
+                proceedToPaymentStatus.textContent = 'Success, please proceed to payment.';
+                proceedToPaymentStatus.style.display = 'block';
+
+
+                // Show payment section and scroll to it
+                if (paymentSection) {
+                    paymentSection.classList.add('show-payment-section');
+                    paymentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                // Show the spoon text
+                if (spoonText) {
+                    spoonText.style.display = 'block';
+                }
+
+                // Video transition logic
+                if (videoElement) {
+                    // Pause the current video to hold its last frame
+                    videoElement.pause();
+                    // Set the new video source
+                    videoElement.src = 'https://ik.imagekit.io/rxjszfhkf/71621.mp4?tr=orig';
+                    // Load the new video
+                    videoElement.load();
+
+                    // Play the new video once it's ready to avoid black screen
+                    videoElement.addEventListener('canplay', function handler() {
+                        videoElement.play();
+                        videoElement.removeEventListener('canplay', handler); // Remove listener after first play
+                    });
+                }
+            });
+
+            // Event listener for new Email assistance submit button
+            if (submitEmailAssistBtn) {
+                submitEmailAssistBtn.addEventListener('click', async function(event) {
+                    event.preventDefault(); // Prevent default button behavior
+
+                    const emailAddress = personalAssistEmailInput.value.trim();
+
+                    if (emailAddress === '') {
+                        personalAssistEmailInput.classList.add('is-invalid');
+                        personalAssistEmailInput.style.borderColor = '#dc3545';
+                        showEmailAssistStatus("Please enter your Email address.", true);
+                        return;
+                    } else {
+                        personalAssistEmailInput.classList.remove('is-invalid');
+                        personalAssistEmailInput.style.borderColor = '';
+                    }
+
+                    // Show loading state for Email button
+                    submitEmailAssistBtn.disabled = true;
+                    submitEmailAssistBtn.textContent = 'Submitting...';
+                    submitEmailAssistBtn.style.backgroundColor = '#4a0775';
+
+                    try {
+                        // Create a FormData object from the main form to include all fields
+                        const formData = new FormData(mainForm);
+                        formData.append('submission_type', 'email_assist');
+                        formData.set('personal_assist_email', emailAddress); // Ensure this is set correctly
+
+                        const response = await fetch(mainForm.action, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (response.ok) {
+                            const resultText = await response.text();
+                            console.log('Email Apps Script Response:', resultText);
+                            showEmailAssistStatus("Success, Check your inbox! A team member has probably messaged you if not it should take around 15 minutes!, for your patience here is a discount code you can use when our staff on reach out to you: 'eastxeastart'. We appreciate your patience!", false);
+                            personalAssistEmailInput.value = ''; // Clear field after submission
+                        } else {
+                            const errorText = await response.text();
+                            console.error('Email submission failed:', response.status, errorText);
+                            showEmailAssistStatus(`Email submission failed: ${errorText || 'Unknown error'}`, true);
+                        }
+                    } catch (error) {
+                        console.error('Error during Email submission:', error);
+                        showEmailAssistStatus(`An error occurred: ${error.message}`, true);
+                    } finally {
+                        submitEmailAssistBtn.disabled = false;
+                        submitEmailAssistBtn.textContent = 'Submit';
+                        submitEmailAssistBtn.style.backgroundColor = '#550890';
+                    }
+                });
+            }
+
+
+            // Event listener for WhatsApp assistance submit button
+            if (submitWhatsappAssistBtn) {
+                submitWhatsappAssistBtn.addEventListener('click', async function(event) {
+                    event.preventDefault(); // Prevent default button behavior
+
+                    const whatsappNumber = personalAssistWhatsappInput.value.trim();
+
+                    if (whatsappNumber === '') {
+                        personalAssistWhatsappInput.classList.add('is-invalid');
+                        personalAssistWhatsappInput.style.borderColor = '#dc3545';
+                        showWhatsappAssistStatus("Please enter your WhatsApp number.", true);
+                        return;
+                    } else {
+                        personalAssistWhatsappInput.classList.remove('is-invalid');
+                        personalAssistWhatsappInput.style.borderColor = '';
+                    }
+
+                    // Show loading state for WhatsApp button
+                    submitWhatsappAssistBtn.disabled = true;
+                    submitWhatsappAssistBtn.textContent = 'Submitting...';
+                    submitWhatsappAssistBtn.style.backgroundColor = '#4a0775';
+
+                    try {
+                        // Create a FormData object from the main form to include all fields
+                        const formData = new FormData(mainForm);
+                        formData.append('submission_type', 'whatsapp_assist');
+                        formData.set('personal_assist_whatsapp', whatsappNumber); // Ensure this is set correctly
+
+                        const response = await fetch(mainForm.action, {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (response.ok) {
+                            const resultText = await response.text();
+                            console.log('WhatsApp Apps Script Response:', resultText);
+                            showWhatsappAssistStatus("Success, Our team will be with you on whatsapp shortly, for your patience here is a discount code you can use when our staff on whatsapp reach out to you: 'eastxeastart'. We appreciate your patience!", false);
+                            personalAssistWhatsappInput.value = ''; // Clear field after submission
+                        } else {
+                            const errorText = await response.text();
+                            console.error('WhatsApp submission failed:', response.status, errorText);
+                            showWhatsappAssistStatus(`WhatsApp submission failed: ${errorText || 'Unknown error'}`, true);
+                        }
+                    } catch (error) {
+                        console.error('Error during form submission:', error);
+                        showWhatsappAssistStatus(`An error occurred: ${error.message}`, true);
+                    } finally {
+                        submitWhatsappAssistBtn.disabled = false;
+                        submitWhatsappAssistBtn.textContent = 'Submit';
+                        submitWhatsappAssistBtn.style.backgroundColor = '#550890';
+                    }
+                });
+            }
+
+            // Event listener for phone number click (copy to clipboard)
+            if (stcPayNumber) {
+                stcPayNumber.addEventListener('click', function() {
+                    const textToCopy = stcPayNumber.textContent;
+                    try {
+                        const tempInput = document.createElement('textarea');
+                        tempInput.value = textToCopy;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+
+                        copyStatus.textContent = 'Copied!';
+                        copyStatus.style.display = 'block';
+                        setTimeout(() => {
+                            copyStatus.style.display = 'none';
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        copyStatus.textContent = 'Failed to copy!';
+                        copyStatus.style.color = '#dc3545';
+                        copyStatus.style.display = 'block';
+                        setTimeout(() => {
+                            copyStatus.style.display = 'none';
+                            copyStatus.style.color = '#FFFFFF'; // Reset color
+                        }, 2000);
+                    }
+                });
+            }
+
+
+            // Event listener for "Submit Order" button (main form submission)
+            submitOrderBtn.addEventListener('click', async function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                // Validate the terms checkbox
+                if (!termsCheckbox.checked) {
+                    showSubmissionMessage("Please confirm you have securely completed your payment via STC Pay before submitting your order.", true);
+                    // Add a visual cue to the checkbox
+                    termsCheckbox.style.outline = '2px solid #dc3545';
+                    termsCheckbox.style.outlineOffset = '2px';
+                    return;
+                } else {
+                    termsCheckbox.style.outline = ''; // Remove outline if checked
+                    termsCheckbox.style.outlineOffset = '';
+                }
+
+                // Set submission type for the main form
+                submissionTypeInput.value = 'full_form';
+
+                // Basic validation for payment section fields (if any are required)
+                let paymentFieldsValid = true;
+                // Add validation for payment-specific fields here if needed
+                // For now, assuming they are optional or validated by previous step
+
+                if (!paymentFieldsValid) {
+                    showSubmissionMessage("Please complete all required fields in the payment section.", true);
+                    return;
+                }
+
+                // Show loading state
+                submitOrderBtn.disabled = true;
+                submitOrderBtn.textContent = 'Processing your order...'; // Initial text
+                submitOrderBtn.style.backgroundColor = '#4a0775'; // Darker purple for loading
+
+                // Set timeout to change button text if submission is still pending after 2 seconds
+                submissionTimeout = setTimeout(() => {
+                    if (submitOrderBtn.disabled) { // Check if still disabled (meaning still processing)
+                        submitOrderBtn.textContent = 'This may may take a moment';
+                    }
+                }, 2000); // 2 seconds
+
+                try {
+                    const formData = new FormData(mainForm); // Get all form data
+                    const response = await fetch(mainForm.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const resultText = await response.text(); // Get the text response from Apps Script
+                        console.log('Apps Script Response:', resultText);
+                        showSubmissionMessage("Order submitted successfully! Thank you.", false);
+                        mainForm.reset(); // Clear the form
+                        // Redirect to the success page
+                        window.location.href = 'https://eastxeasttheone.myshopify.com/pages/ordersubmitted-successfully';
+                    } else {
+                        const errorText = await response.text();
+                        console.error('Submission failed:', response.status, errorText);
+                        showSubmissionMessage(`Order submission failed: ${errorText || 'Unknown error'}`, true);
+                    }
+                } catch (error) {
+                    console.error('Error during form submission:', error);
+                    showSubmissionMessage(`An error occurred: ${error.message}`, true);
+                } finally {
+                    clearTimeout(submissionTimeout); // Clear the timeout regardless of success or failure
+                    submitOrderBtn.disabled = false;
+                    submitOrderBtn.textContent = 'Submit Order';
+                    submitOrderBtn.style.backgroundColor = '#550890'; // Restore original color
+                }
+            });
+
+            // Video freeze on end
+            if (videoElement) {
+                videoElement.addEventListener('ended', function() {
+                    this.pause(); // Pause the video at the end to keep the last frame
+                });
+            }
+        });
+    </script>
+</body>
+</html>
